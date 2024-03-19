@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/render-element",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./dist/render-element.cjs",
+  "module": "./dist/render-element.mjs",
+  "unpkg": "./dist/render-element.global.min.js",
+  "jsdelivr": "./dist/render-element.global.min.js",
+  "types": "./dist/render-element.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

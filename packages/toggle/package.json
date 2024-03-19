@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/toggle",
+  "version": "0.1.0",
+  "description": "Toggle event controller (hover/click/press/focus and more...), used to toggle the menu/tooltip/popover component ON or OFF",
+  "type": "module",
+  "main": "./dist/toggle.cjs",
+  "module": "./dist/toggle.mjs",
+  "unpkg": "./dist/toggle.global.min.js",
+  "jsdelivr": "./dist/toggle.global.min.js",
+  "types": "./dist/toggle.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

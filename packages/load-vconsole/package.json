@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/load-vconsole",
+  "version": "0.0.1",
+  "description": "",
+  "type": "module",
+  "main": "./dist/load-vconsole.cjs",
+  "module": "./dist/load-vconsole.mjs",
+  "unpkg": "./dist/load-vconsole.global.min.js",
+  "jsdelivr": "./dist/load-vconsole.global.min.js",
+  "types": "./dist/load-vconsole.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

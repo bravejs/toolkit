@@ -1,0 +1,17 @@
+{
+  "name": "@bravejs/git-tag",
+  "version": "0.0.1",
+  "description": "Git tag auto-increment version",
+  "type": "module",
+  "main": "./dist/git-tag.cjs",
+  "module": "./dist/git-tag.mjs",
+  "types": "./dist/git-tag.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT",
+  "engines": {
+    "node": "*"
+  }
+}

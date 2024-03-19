@@ -1,0 +1,19 @@
+{
+  "name": "@bravejs/gesture",
+  "version": "0.0.1",
+  "description": "Powerful and lightweight gesture event library, supports: pan/pinch/press/rotate/swipe/tap/wheel",
+  "type": "module",
+  "main": "./dist/gesture.cjs",
+  "module": "./dist/gesture.mjs",
+  "unpkg": "./dist/gesture.global.min.js",
+  "jsdelivr": "./dist/gesture.global.min.js",
+  "types": "./dist/gesture.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT",
+  "devDependencies": {
+    "hammerjs": "^2.0.8"
+  }
+}

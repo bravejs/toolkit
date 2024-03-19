@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/swagger-parser",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./dist/swagger-parser.cjs",
+  "module": "./dist/swagger-parser.mjs",
+  "unpkg": "./dist/swagger-parser.global.min.js",
+  "jsdelivr": "./dist/swagger-parser.global.min.js",
+  "types": "./dist/swagger-parser.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

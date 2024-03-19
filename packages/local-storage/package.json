@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/local-storage",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./dist/local-storage.cjs",
+  "module": "./dist/local-storage.mjs",
+  "unpkg": "./dist/local-storage.global.min.js",
+  "jsdelivr": "./dist/local-storage.global.min.js",
+  "types": "./dist/local-storage.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

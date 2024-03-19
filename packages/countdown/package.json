@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/countdown",
+  "version": "1.0.0",
+  "description": "Countdown, accurate and easy-to-use countdown",
+  "type": "module",
+  "main": "./dist/countdown.cjs",
+  "module": "./dist/countdown.mjs",
+  "unpkg": "./dist/countdown.global.min.js",
+  "jsdelivr": "./dist/countdown.global.min.js",
+  "types": "./dist/countdown.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

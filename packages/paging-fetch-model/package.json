@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/paging-fetch-model",
+  "version": "0.0.1",
+  "description": "Paging request model, supporting limited page or unlimited page requests",
+  "type": "module",
+  "main": "./dist/paging-fetch-model.cjs",
+  "module": "./dist/paging-fetch-model.mjs",
+  "unpkg": "./dist/paging-fetch-model.global.min.js",
+  "jsdelivr": "./dist/paging-fetch-model.global.min.js",
+  "types": "./dist/paging-fetch-model.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

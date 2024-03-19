@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/validator",
+  "version": "0.0.1",
+  "description": "Data validator, supports asynchronous based on promise",
+  "type": "module",
+  "main": "./dist/validator.cjs",
+  "module": "./dist/validator.mjs",
+  "unpkg": "./dist/validator.global.min.js",
+  "jsdelivr": "./dist/validator.global.min.js",
+  "types": "./dist/validator.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

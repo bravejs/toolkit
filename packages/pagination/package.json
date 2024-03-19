@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/pagination",
+  "version": "1.0.0",
+  "description": "Pagination-core, used to generate paging controls",
+  "type": "module",
+  "main": "./dist/pagination.cjs",
+  "module": "./dist/pagination.mjs",
+  "unpkg": "./dist/pagination.global.min.js",
+  "jsdelivr": "./dist/pagination.global.min.js",
+  "types": "./dist/pagination.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

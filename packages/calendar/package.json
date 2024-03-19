@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/calendar",
+  "version": "1.0.0",
+  "description": "Calendar-core, used to generate calendar views (month/week)",
+  "type": "module",
+  "main": "./dist/calendar.cjs",
+  "module": "./dist/calendar.mjs",
+  "unpkg": "./dist/calendar.global.min.js",
+  "jsdelivr": "./dist/calendar.global.min.js",
+  "types": "./dist/calendar.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

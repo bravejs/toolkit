@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/transition",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./dist/transition.cjs",
+  "module": "./dist/transition.mjs",
+  "unpkg": "./dist/transition.global.min.js",
+  "jsdelivr": "./dist/transition.global.min.js",
+  "types": "./dist/transition.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

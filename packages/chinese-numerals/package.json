@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/chinese-numerals",
+  "version": "1.0.0",
+  "description": "Convert Arabic numerals to Chinese numerals",
+  "type": "module",
+  "main": "./dist/chinese-numerals.cjs",
+  "module": "./dist/chinese-numerals.mjs",
+  "unpkg": "./dist/chinese-numerals.global.min.js",
+  "jsdelivr": "./dist/chinese-numerals.global.min.js",
+  "types": "./dist/chinese-numerals.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

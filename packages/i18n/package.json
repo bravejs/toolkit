@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/i18n",
+  "version": "0.0.1",
+  "description": "Lightweight i18n",
+  "type": "module",
+  "main": "./dist/i18n.cjs",
+  "module": "./dist/i18n.mjs",
+  "unpkg": "./dist/i18n.global.min.js",
+  "jsdelivr": "./dist/i18n.global.min.js",
+  "types": "./dist/i18n.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

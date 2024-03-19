@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/clickout",
+  "version": "1.0.0",
+  "description": "Mouse click-out event. Action for closing the page popup layer",
+  "type": "module",
+  "main": "./dist/clickout.cjs",
+  "module": "./dist/clickout.mjs",
+  "unpkg": "./dist/clickout.global.min.js",
+  "jsdelivr": "./dist/clickout.global.min.js",
+  "types": "./dist/clickout.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

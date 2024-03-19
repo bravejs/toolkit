@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Hammerjs</title>
+    <style>
+      body {
+        margin: 0;
+      }
+
+      .container {
+        height: 100vh;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .box {
+        width: 200px;
+        height: 200px;
+        background: orange;
+      }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="box"></div>
+</div>
+
+<script src="../../node_modules/hammerjs/hammer.js"></script>
+<script>
+  const boxEl = document.querySelector('.box')
+
+  const h = new Hammer(boxEl)
+
+  h.on('pan', (evt) => {
+    console.log(evt)
+  })
+</script>
+</body>
+</html>

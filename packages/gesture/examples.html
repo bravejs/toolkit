@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Gesture Examples</title>
+    <style>
+      body {
+        margin: 0;
+      }
+
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .item {
+        width: 200px;
+        height: 200px;
+        background: #08f;
+        margin: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        //user-select: none;
+        position: relative;
+        border: 1px solid #eee;
+        z-index: 10;
+        flex-shrink: 0;
+        //transform-origin: left top;
+      }
+
+      .item:hover {
+        z-index: 20;
+      }
+
+      .fixedItem {
+        width: 200px;
+        height: 200px;
+        border: 1px dashed red;
+        position: fixed;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+        color: #ccc;
+      }
+    </style>
+</head>
+<body>
+<div class="container"></div>
+
+<script type="module">
+  import { PanModel } from './dist/pan.js'
+  import { PinchModel } from './dist/pinch.js'
+  import { RotateModel } from './dist/rotate.js'
+  import { SwipeModel } from './dist/swipe.js'
+  import { useTransform, useSwipe } from './dist/browser.js'
+
+  /**
+   * @param {((el: HTMLElement)=>any)[]} items
+   */
+  function init (items) {
+    const root = document.createElement('div')
+    root.className = 'container'
+    for (const item of items) {
+      const div = document.createElement('div')
+      const result = item(div) || {}
+      div.className = 'item ' + (result.name?.toLowerCase() || '')
+      div.textContent = result.name
+      root.appendChild(div)
+
+      setTimeout(() => {
+        const rect = div.getBoundingClientRect()
+        const fixedDiv = document.createElement('div')
+        fixedDiv.className = 'fixedItem'
+        fixedDiv.textContent = result.name
+        fixedDiv.style.left = rect.left + 'px'
+        fixedDiv.style.top = rect.top + 'px'
+        document.body.appendChild(fixedDiv)
+      })
+    }
+    document.body.appendChild(root)
+  }
+
+  init([
+    /**
+     * =========================================================
+     * =========================================================
+     */
+    function (el) {
+      useTransform(el, new PanModel(), (model) => {
+        el.style.transform = `translate(${model.translate.x}px, ${model.translate.y}px)`
+      })
+
+      return {
+        name: 'Pan',
+      }
+    },
+
+    /**
+     * =========================================================
+     * =========================================================
+     */
+    function (el) {
+      useTransform(el, new PinchModel(), (model) => {
+        el.style.transform = `scale(${model.scale})`
+      })
+
+      return {
+        name: 'Pinch',
+      }
+    },
+
+    /**
+     * =========================================================
+     * =========================================================
+     */
+    function (el) {
+      const model = new RotateModel()
+
+      useTransform(el, model, () => {
+        el.style.transform = `rotate(${model.rotation}deg)`
+      })
+
+      return {
+        name: 'Rotate',
+      }
+    },
+
+    /**
+     * =========================================================
+     * =========================================================
+     */
+    function (el) {
+      const model = new SwipeModel()
+
+      useSwipe(el, model, () => {
+        el.textContent = `Swipe: ${model.direction}`
+      })
+
+      return {
+        name: 'Swipe',
+      }
+    },
+
+    function (el) {
+      const m1 = new PanModel()
+      const m2 = new PinchModel()
+      const m3 = new RotateModel()
+      const m4 = new SwipeModel()
+
+      useTransform(el, [m1, m2, m3], () => {
+        el.style.transform = `translate(${m1.translate.x}px, ${m1.translate.y}px) scale(${m2.scale}) rotate(${m3.rotation}deg)`
+      })
+
+      useSwipe(el, m4, () => {
+        el.textContent = `All: ${m4.direction}`
+      })
+
+      return {
+        name: 'All',
+      }
+    },
+  ])
+</script>
+</body>
+</html>

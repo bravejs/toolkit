@@ -1,0 +1,32 @@
+{
+  "name": "@bravejs/toolkit",
+  "version": "0.0.0",
+  "description": "🧰 bravejs toolkit 🛠️",
+  "type": "module",
+  "scripts": {
+    "init": "node ./scripts/init-package.js",
+    "build": "rollup -c",
+    "test": "jest"
+  },
+  "author": "shixianqin",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bravejs/toolkit.git"
+  },
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.4.8",
+    "del": "^7.1.0",
+    "jest": "^29.7.0",
+    "rollup": "^4.12.1",
+    "rollup-plugin-dts": "^6.1.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.1.6"
+  }
+}

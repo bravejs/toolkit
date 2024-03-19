@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/load-script",
+  "version": "0.0.1",
+  "description": "",
+  "type": "module",
+  "main": "./dist/load-script.cjs",
+  "module": "./dist/load-script.mjs",
+  "unpkg": "./dist/load-script.global.min.js",
+  "jsdelivr": "./dist/load-script.global.min.js",
+  "types": "./dist/load-script.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}

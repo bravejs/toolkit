@@ -1,0 +1,1360 @@
+{
+  "schemes": [],
+  "swagger": "2.0",
+  "info": {
+    "description": "",
+    "title": "",
+    "contact": {},
+    "version": ""
+  },
+  "host": "",
+  "basePath": "/v1",
+  "paths": {
+    "/admin/get-prompt-remote-version": {
+      "get": {
+        "description": "获取 prompt 本地版本号",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "获取 prompt 本地版本号",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "admintoken",
+            "name": "admintoken",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.GetPromptVersionOutputDTO"
+            }
+          }
+        }
+      }
+    },
+    "/admin/get-template-sync-time": {
+      "get": {
+        "description": "获取 template 同步时间",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "获取 template 同步时间",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "admintoken",
+            "name": "admintoken",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.AdminGetTemplateSyncTimeOutput"
+            }
+          }
+        }
+      }
+    },
+    "/admin/list-conversation": {
+      "get": {
+        "description": "获取指定用户的会话列表",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "获取指定用户的会话列表",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "admintoken",
+            "name": "admintoken",
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "description": "keyword",
+            "name": "keyword",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.AdminListConversationOutputDTO"
+            }
+          }
+        }
+      }
+    },
+    "/admin/list-message": {
+      "get": {
+        "description": "获取指定用户的会话的消息列表",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "获取指定用户的会话的消息列表",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "admintoken",
+            "name": "admintoken",
+            "in": "header"
+          },
+          {
+            "type": "integer",
+            "description": "conversation id",
+            "name": "conversation_id",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.AdminListMessageOutputDTO"
+            }
+          }
+        }
+      }
+    },
+    "/admin/sync-prompt": {
+      "post": {
+        "description": "sync prompt",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "sync prompt",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "admintoken",
+            "name": "admintoken",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.AdminSyncPromptOutput"
+            }
+          }
+        }
+      }
+    },
+    "/admin/sync-template": {
+      "post": {
+        "description": "sync template",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "sync template",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "admintoken",
+            "name": "admintoken",
+            "in": "header"
+          },
+          {
+            "description": "request body",
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/web.AdminSyncTemplateInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.AdminGetTemplateSyncTimeOutput"
+            }
+          }
+        }
+      }
+    },
+    "/admin/sync-template-prompt": {
+      "post": {
+        "description": "同步 角色扮演/主题聊天/单句评价/阶段总结 prompt 中的一项",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "同步 角色扮演/主题聊天/单句评价/阶段总结 prompt 中的一项",
+        "parameters": [
+          {
+            "description": "request body",
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/web.AdminSyncTemplatePromptInput"
+            }
+          },
+          {
+            "type": "string",
+            "description": "admintoken",
+            "name": "admintoken",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.AdminSyncPromptOutput"
+            }
+          }
+        }
+      }
+    },
+    "/admin/user-login": {
+      "post": {
+        "description": "admin login",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "admin 账户登录",
+        "parameters": [
+          {
+            "description": "request body",
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/web.AdminUserLoginInputDTO"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.AdminUserLoginOutputDTO"
+            }
+          }
+        }
+      }
+    },
+    "/conversation/create-conversation": {
+      "post": {
+        "description": "会话开始时系统给出的前导语句",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "conversation"
+        ],
+        "summary": "创建新会话",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "token",
+            "name": "token",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.ConversationCreateOutputDTO"
+            }
+          }
+        }
+      }
+    },
+    "/conversation/list-conversation": {
+      "get": {
+        "description": "获取用户会话列表",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "conversation"
+        ],
+        "summary": "获取用户会话列表",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "token",
+            "name": "token",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.ConversationListOutputDTO"
+            }
+          }
+        }
+      }
+    },
+    "/conversation/list-message": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "conversation"
+        ],
+        "summary": "获取某个对话的消息列表",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "token",
+            "name": "token",
+            "in": "header"
+          },
+          {
+            "type": "integer",
+            "description": "conversation id",
+            "name": "conversation_id",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.ListMessageOutputDTO"
+            }
+          }
+        }
+      }
+    },
+    "/conversation/list-template": {
+      "get": {
+        "description": "主题, 角色扮演模板列表，用于更新会话模板",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "conversation"
+        ],
+        "summary": "会话模板列表",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "token",
+            "name": "token",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.ConversationTemplateListOutputDTO"
+            }
+          }
+        }
+      }
+    },
+    "/conversation/send-message": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "conversation"
+        ],
+        "summary": "发送消息",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "token",
+            "name": "token",
+            "in": "header"
+          },
+          {
+            "description": "data",
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/web.SendMessageInputDTO"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.SendMessageOutputDTO"
+            }
+          }
+        }
+      }
+    },
+    "/conversation/send-message-byspeech": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "conversation"
+        ],
+        "summary": "语音翻译为文本",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "token",
+            "name": "token",
+            "in": "header"
+          },
+          {
+            "type": "integer",
+            "description": "ID of the conversation",
+            "name": "conversation_id",
+            "in": "formData",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/speech.SpeechToTextResponse"
+            }
+          }
+        }
+      }
+    },
+    "/conversation/speech-to-text": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "conversation"
+        ],
+        "summary": "语音翻译为文本",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "token",
+            "name": "token",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/speech.SpeechToTextResponse"
+            }
+          }
+        }
+      }
+    },
+    "/conversation/update-conversation-type": {
+      "post": {
+        "description": "选择会话模板",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "conversation"
+        ],
+        "summary": "选择会话模板",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "token",
+            "name": "token",
+            "in": "header"
+          },
+          {
+            "description": "data",
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/web.ConversationUpdateTypeInputDTO"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.ConversationUpdateTypeOutputDTO"
+            }
+          }
+        }
+      }
+    },
+    "/evaluation/phase-sentence": {
+      "post": {
+        "description": "阶段性评估",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "translate"
+        ],
+        "summary": "阶段性评估",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "token",
+            "name": "token",
+            "in": "header"
+          },
+          {
+            "description": "request body",
+            "name": "PhaseEvaluationInputDTO",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/web.PhaseEvaluationInputDTO"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.PhaseEvaluationOutputDTO"
+            }
+          }
+        }
+      }
+    },
+    "/evaluation/single-sentence": {
+      "post": {
+        "description": "单句评估",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "translate"
+        ],
+        "summary": "单句评估",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "token",
+            "name": "token",
+            "in": "header"
+          },
+          {
+            "description": "request body",
+            "name": "SingleSentenceEvaluationInputDTO",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/web.SingleSentenceEvaluationInputDTO"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.SingleSentenceEvaluationOutputDTO"
+            }
+          }
+        }
+      }
+    },
+    "/translate/sentence": {
+      "post": {
+        "description": "翻译句子，默认汉译英。目前支持中英文互译，传递的语言code可以为：英文、中文、zh-Hans、en、cn",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "translate"
+        ],
+        "summary": "翻译句子",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "token",
+            "name": "token",
+            "in": "header"
+          },
+          {
+            "description": "request body",
+            "name": "TextRequest",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/translator.TextRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/translator.TextResponse"
+            }
+          }
+        }
+      }
+    },
+    "/translate/words": {
+      "post": {
+        "description": "翻译单词，默认汉译英。目前支持中英文互译，传递的语言code可以为：英文、中文、zh-Hans、en、cn",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "translate"
+        ],
+        "summary": "翻译单词",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "token",
+            "name": "token",
+            "in": "header"
+          },
+          {
+            "description": "request body",
+            "name": "WordInfoRequest",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/translator.WordRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/translator.WordInfoResponse"
+            }
+          }
+        }
+      }
+    },
+    "/user/init": {
+      "post": {
+        "description": "user init",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "账户数据初始化",
+        "parameters": [
+          {
+            "description": "request body",
+            "name": "UserInitInputDTO",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/web.UserInitInputDTO"
+            }
+          },
+          {
+            "type": "string",
+            "description": "token",
+            "name": "token",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.UserOutputDTO"
+            }
+          }
+        }
+      }
+    },
+    "/user/wechat-miniprogram-login": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "微信小程序登录接口",
+        "parameters": [
+          {
+            "description": "request body",
+            "name": "WechatMiniprogramLoginInputDTO",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/web.WechatMiniprogramLoginInputDTO"
+            }
+          },
+          {
+            "type": "string",
+            "description": "token",
+            "name": "token",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/web.UserOutputDTO"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "model.ConversationTemplateType": {
+      "type": "integer",
+      "enum": [
+        0,
+        1,
+        2
+      ],
+      "x-enum-varnames": [
+        "ConversationTemplateTypeUnknown",
+        "ConversationTemplateTypeTopic",
+        "ConversationTemplateTypeRolePlay"
+      ]
+    },
+    "model.PromptType": {
+      "type": "string",
+      "enum": [
+        "",
+        "topic",
+        "roleplay",
+        "single_evaluation",
+        "multi_evaluation"
+      ],
+      "x-enum-varnames": [
+        "PromptTypeTopicNone",
+        "PromptTypeTopic",
+        "PromptTypeRoleplay",
+        "PromptTypeSingleEvaluation",
+        "PromptTypeMultiEvaluation"
+      ]
+    },
+    "model.RoleType": {
+      "type": "integer",
+      "enum": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "x-enum-comments": {
+        "RoleTypeAssistant": "NPC",
+        "RoleTypeFallback": "兜底文案",
+        "RoleTypeGuide": "会话引导语，注意给 GPT 时需要过滤",
+        "RoleTypeSummary": "阶段性总结",
+        "RoleTypeSystem": "系统(用于 prompt 工程)",
+        "RoleTypeUser": "用户"
+      },
+      "x-enum-varnames": [
+        "RoleTypeUnknown",
+        "RoleTypeUser",
+        "RoleTypeAssistant",
+        "RoleTypeSystem",
+        "RoleTypeSummary",
+        "RoleTypeGuide",
+        "RoleTypeFallback"
+      ]
+    },
+    "speech.SpeechToTextResponse": {
+      "type": "object",
+      "properties": {
+        "DisplayText": {
+          "type": "string"
+        },
+        "Duration": {
+          "type": "integer"
+        },
+        "Offset": {
+          "type": "integer"
+        },
+        "RecognitionStatus": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "translator.TextRequest": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        }
+      }
+    },
+    "translator.TextResponse": {
+      "type": "object",
+      "properties": {
+        "meaning": {
+          "type": "string"
+        }
+      }
+    },
+    "translator.WordInfoResponse": {
+      "type": "object",
+      "properties": {
+        "meanings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pos": {
+          "description": "词性 (Part of Speech)",
+          "type": "string"
+        },
+        "word": {
+          "type": "string"
+        }
+      }
+    },
+    "translator.WordRequest": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "wordToLookup": {
+          "type": "string"
+        }
+      }
+    },
+    "web.AdminGetTemplateSyncTimeOutput": {
+      "type": "object",
+      "properties": {
+        "roleplay_sync_time": {
+          "type": "integer"
+        },
+        "topic_sync_time": {
+          "type": "integer"
+        }
+      }
+    },
+    "web.AdminListConversationOutputDTO": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/web.ConversationOutputDTO"
+          }
+        }
+      }
+    },
+    "web.AdminListMessageOutputDTO": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/web.MessageOutputDTO"
+          }
+        }
+      }
+    },
+    "web.AdminSyncPromptOutput": {
+      "type": "object"
+    },
+    "web.AdminSyncTemplateInput": {
+      "type": "object",
+      "properties": {
+        "template_type": {
+          "$ref": "#/definitions/model.ConversationTemplateType"
+        }
+      }
+    },
+    "web.AdminSyncTemplatePromptInput": {
+      "type": "object",
+      "properties": {
+        "prompt_type": {
+          "$ref": "#/definitions/model.PromptType"
+        }
+      }
+    },
+    "web.AdminUser": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        }
+      }
+    },
+    "web.AdminUserLoginInputDTO": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        }
+      }
+    },
+    "web.AdminUserLoginOutputDTO": {
+      "type": "object",
+      "properties": {
+        "admin_user": {
+          "$ref": "#/definitions/web.AdminUser"
+        },
+        "token": {
+          "type": "string"
+        }
+      }
+    },
+    "web.ConversationCreateOutputDTO": {
+      "type": "object",
+      "properties": {
+        "conversation": {
+          "$ref": "#/definitions/web.ConversationOutputDTO"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/web.MessageOutputDTO"
+          }
+        }
+      }
+    },
+    "web.ConversationListOutputDTO": {
+      "type": "object",
+      "properties": {
+        "conversation_list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/web.ConversationOutputDTO"
+          }
+        }
+      }
+    },
+    "web.ConversationOutputDTO": {
+      "type": "object",
+      "properties": {
+        "conversation_id": {
+          "type": "integer"
+        },
+        "conversation_type": {
+          "description": "ConversationType is type of template.\n* 1 - Topic 主题\n* 2 - RolePlay 角色扮演",
+          "type": "integer",
+          "enum": [
+            1,
+            2
+          ]
+        },
+        "created_time": {
+          "description": "创建时间",
+          "type": "integer"
+        },
+        "updated_time": {
+          "description": "更新时间",
+          "type": "integer"
+        }
+      }
+    },
+    "web.ConversationTemplate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/model.ConversationTemplateType"
+        }
+      }
+    },
+    "web.ConversationTemplateListOutputDTO": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/web.ConversationTemplate"
+          }
+        }
+      }
+    },
+    "web.ConversationUpdateTypeInputDTO": {
+      "type": "object",
+      "properties": {
+        "conversation_id": {
+          "type": "integer"
+        },
+        "template_id": {
+          "type": "integer"
+        }
+      }
+    },
+    "web.ConversationUpdateTypeOutputDTO": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/web.MessageOutputDTO"
+          }
+        }
+      }
+    },
+    "web.GetPromptVersionOutputDTO": {
+      "type": "object",
+      "properties": {
+        "multi_evaluation_prompt": {
+          "type": "string"
+        },
+        "multi_evaluation_version": {
+          "type": "string"
+        },
+        "roleplay_chat_prompt": {
+          "type": "string"
+        },
+        "roleplay_chat_version": {
+          "type": "string"
+        },
+        "single_evaluation_prompt": {
+          "type": "string"
+        },
+        "single_evaluation_version": {
+          "type": "string"
+        },
+        "topic_chat_prompt": {
+          "type": "string"
+        },
+        "topic_chat_version": {
+          "type": "string"
+        }
+      }
+    },
+    "web.ListMessageOutputDTO": {
+      "type": "object",
+      "properties": {
+        "message_list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/web.MessageOutputDTO"
+          }
+        }
+      }
+    },
+    "web.MessageOutputDTO": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "conversation_id": {
+          "type": "integer"
+        },
+        "created_time": {
+          "description": "创建时间",
+          "type": "integer"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "phase_evaluation": {
+          "$ref": "#/definitions/web.PhaseEvaluationOutput"
+        },
+        "role": {
+          "description": "Role is role type of message.\n* 1 - 用户\n* 2 - 老师\n* 3 - 系统(一般不会出现在接口返回里)",
+          "enum": [
+            1,
+            2,
+            3
+          ],
+          "allOf": [
+            {
+              "$ref": "#/definitions/model.RoleType"
+            }
+          ]
+        },
+        "sequence": {
+          "type": "integer"
+        },
+        "speech_url": {
+          "type": "string"
+        },
+        "suggestion": {
+          "$ref": "#/definitions/web.SingleSentenceEvaluationOutput"
+        },
+        "updated_time": {
+          "description": "更新时间",
+          "type": "integer"
+        }
+      }
+    },
+    "web.PhaseEvaluationInputDTO": {
+      "type": "object",
+      "properties": {
+        "conversation_id": {
+          "type": "integer"
+        }
+      }
+    },
+    "web.PhaseEvaluationOutput": {
+      "type": "object",
+      "properties": {
+        "highlight": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lowlight": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "translated_highlight": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "translated_lowlight": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "web.PhaseEvaluationOutputDTO": {
+      "type": "object",
+      "properties": {
+        "phase_evaluation": {
+          "$ref": "#/definitions/web.PhaseEvaluationOutput"
+        }
+      }
+    },
+    "web.SendMessageInputDTO": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "conversation_id": {
+          "type": "integer"
+        }
+      }
+    },
+    "web.SendMessageOutputDTO": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/web.MessageOutputDTO"
+          }
+        }
+      }
+    },
+    "web.SingleSentenceEvaluationInputDTO": {
+      "type": "object",
+      "properties": {
+        "conversation_id": {
+          "type": "integer"
+        },
+        "sequence": {
+          "type": "integer"
+        }
+      }
+    },
+    "web.SingleSentenceEvaluationOutput": {
+      "type": "object",
+      "properties": {
+        "issue": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rating": {
+          "type": "integer"
+        },
+        "rewriting": {
+          "type": "string"
+        },
+        "translated_issue": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "web.SingleSentenceEvaluationOutputDTO": {
+      "type": "object",
+      "properties": {
+        "single_evaluation": {
+          "$ref": "#/definitions/web.SingleSentenceEvaluationOutput"
+        }
+      }
+    },
+    "web.UserInitInputDTO": {
+      "type": "object",
+      "properties": {
+        "invitation_code": {
+          "type": "string"
+        }
+      }
+    },
+    "web.UserOutputDTO": {
+      "type": "object",
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "nickname": {
+          "type": "string"
+        }
+      }
+    },
+    "web.WechatMiniprogramLoginInputDTO": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
