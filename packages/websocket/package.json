@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/websocket",
+  "version": "0.1.0",
+  "description": "WebSocket connection based on subscription mechanism",
+  "type": "module",
+  "main": "./dist/websocket.cjs",
+  "module": "./dist/websocket.mjs",
+  "unpkg": "./dist/websocket.global.min.js",
+  "jsdelivr": "./dist/websocket.global.min.js",
+  "types": "./dist/websocket.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}
