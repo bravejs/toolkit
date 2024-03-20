@@ -1,4 +1,4 @@
-const dateFormatter = require('../dist/index');
+const dateFormatter = require('../dist/date-formatter.cjs');
 
 test('Y-M-D H:m:s.ms-w z', () => {
   expect(dateFormatter('1998-3-6 6:15:39.066 +0800',

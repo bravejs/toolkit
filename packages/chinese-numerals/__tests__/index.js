@@ -1,4 +1,4 @@
-const chineseNumber = require('../dist/index');
+const chineseNumber = require('../dist/chinese-numerals.cjs');
 
 describe('Normal', () => {
   test('1：一', () => {

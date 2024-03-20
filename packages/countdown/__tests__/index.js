@@ -1,4 +1,4 @@
-const Countdown = require('../dist/index');
+const Countdown = require('../dist/countdown.cjs');
 
 const cd = new Countdown();
 

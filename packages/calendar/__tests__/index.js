@@ -1,4 +1,4 @@
-const Calendar = require('../dist/calendar');
+const Calendar = require('../dist/calendar.cjs');
 const c = new Calendar('2019-3-30');
 
 test('2019-3-30', () => {
