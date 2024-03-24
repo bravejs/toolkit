@@ -25,8 +25,8 @@ module.exports = {
     'no-console': 'error',
     'no-debugger': 'error',
 
-    // 开启结尾逗号
-    'comma-dangle': 'error',
+    // 开启多行结尾逗号
+    'comma-dangle': ['error', 'always-multiline'],
 
     // 开启结尾分号
     semi: 'error',
