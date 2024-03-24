@@ -8,7 +8,7 @@ import {
   isNodeOnly,
   packages,
   pascalName,
-  readPackageConfig
+  readPackageConfig,
 } from './scripts/utils.js';
 import buildConfig from './scripts/build-config.js';
 
@@ -16,7 +16,7 @@ import buildConfig from './scripts/build-config.js';
 import './scripts/inject-packages-list.js';
 
 const tsPlugin = ts({
-  compilerOptions: tsconfig.compilerOptions
+  compilerOptions: tsconfig.compilerOptions,
 });
 
 const terserPlugin = terser();
@@ -41,49 +41,51 @@ packages.forEach((item) => {
   const outputOptions = [
     {
       format: 'cjs',
-      file: `${outDir}/${name + buildConfig.ext.cjs}`
+      file: `${outDir}/${name + buildConfig.ext.cjs}`,
     },
     {
       format: 'es',
-      file: `${outDir}/${name + buildConfig.ext.esm}`
-    }
+      file: `${outDir}/${name + buildConfig.ext.esm}`,
+    },
   ];
 
   // Not node env only, build for browser
   if (!isNodeOnly(pkgConfig)) {
-    const libName = pascalName(name);
+    /** @type import('rollup').OutputOptions */
+    const base = {
+      name: pascalName(name),
+      globals: buildConfig.globals,
+      format: 'iife',
+      exports: 'named',
+    };
 
     outputOptions.push(
       {
-        name: libName,
-        globals: buildConfig.globals,
-        format: 'iife',
-        file: `${outDir}/${name + buildConfig.ext.iife}`
+        ...base,
+        file: `${outDir}/${name + buildConfig.ext.iife}`,
       },
       {
-        name: libName,
-        globals: buildConfig.globals,
-        format: 'iife',
+        ...base,
         file: `${outDir}/${name + buildConfig.ext.iifeMin}`,
-        plugins: [terserPlugin]
-      }
+        plugins: [terserPlugin],
+      },
     );
   }
-
+  
   rollupOptions.push(
     {
       input: inputFile,
       output: outputOptions,
-      plugins: [tsPlugin]
+      plugins: [tsPlugin],
     },
     {
       input: inputFile,
       output: {
         format: 'es',
-        file: `${outDir}/${name + buildConfig.ext.dts}`
+        file: `${outDir}/${name + buildConfig.ext.dts}`,
       },
-      plugins: [dtsPlugin]
-    }
+      plugins: [dtsPlugin],
+    },
   );
 });
 

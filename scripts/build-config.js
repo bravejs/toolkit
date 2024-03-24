@@ -5,7 +5,7 @@ export default {
 
   /**@type {string[]}*/
   excludePackages: [
-    'eslint-config'
+    'eslint-config',
   ],
 
   outDir: 'dist',
@@ -14,11 +14,11 @@ export default {
     esm: '.mjs',
     iife: '.global.js',
     iifeMin: '.global.min.js',
-    dts: '.d.ts'
+    dts: '.d.ts',
   },
   globals: {
     vue: 'Vue',
     react: 'React',
-    'react-dom': 'ReactDOM'
-  }
+    'react-dom': 'ReactDOM',
+  },
 };
