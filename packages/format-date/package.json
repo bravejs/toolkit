@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/format-date",
+  "version": "1.0.0",
+  "description": "Date time formatter, like this: YYYY-MM-DD HH:mm:ss",
+  "type": "module",
+  "main": "./dist/format-date.cjs",
+  "module": "./dist/format-date.mjs",
+  "unpkg": "./dist/format-date.global.min.js",
+  "jsdelivr": "./dist/format-date.global.min.js",
+  "types": "./dist/format-date.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}
