@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/format-number",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./dist/format-number.cjs",
+  "module": "./dist/format-number.mjs",
+  "unpkg": "./dist/format-number.global.min.js",
+  "jsdelivr": "./dist/format-number.global.min.js",
+  "types": "./dist/format-number.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}
