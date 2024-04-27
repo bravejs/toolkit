@@ -1,0 +1,16 @@
+{
+  "name": "@bravejs/create-element",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./dist/create-element.cjs",
+  "module": "./dist/create-element.mjs",
+  "unpkg": "./dist/create-element.global.min.js",
+  "jsdelivr": "./dist/create-element.global.min.js",
+  "types": "./dist/create-element.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT"
+}
