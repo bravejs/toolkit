@@ -1,7 +1,7 @@
 {
   "name": "@bravejs/promise-ref",
   "version": "0.0.0",
-  "description": "",
+  "description": "PromiseRef is a Promise-based React component encapsulation method, aims to simplify the handling of component asynchronous input and output scenarios.",
   "type": "module",
   "main": "./dist/promise-ref.cjs",
   "module": "./dist/promise-ref.mjs",
