@@ -1,0 +1,22 @@
+{
+  "name": "@bravejs/promise-ref",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./dist/promise-ref.cjs",
+  "module": "./dist/promise-ref.mjs",
+  "types": "./dist/promise-ref.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "shixianqin",
+  "license": "MIT",
+  "unpkg": "./dist/promise-ref.global.min.js",
+  "jsdelivr": "./dist/promise-ref.global.min.js",
+  "peerDependencies": {
+    "react": "^18"
+  },
+  "engines": {
+    "node": "*"
+  }
+}
