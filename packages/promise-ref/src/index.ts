@@ -45,7 +45,7 @@ export class PromiseRef<Props extends PromiseRefProps<any>> {
   /**
    * 组件渲染插槽。这是一个组件，可放在 tsx 中你想放的任意位置
    */
-  Slot = createEmptySlot();
+  Slot: Slot;
 
   /**
    * @param render 渲染器（React 函数组件）
