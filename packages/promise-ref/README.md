@@ -31,11 +31,11 @@ PromiseRef 更加适用于临时性和一次性的场景，同时也能提升程
 ## Interface
 
 ```typescript
-import { type JSX } from 'react'
+import { JSX } from 'react'
 
 /**
- * PromiseRef 组件基本参数
- * @property resolve Promise 的 resovle 回调函数
+ * PromiseRef 组件的基础参数类型
+ * @property resolve Promise 的 resolve 回调函数
  * @property reject Promise 的 reject 回调函数
  */
 interface PromiseRefProps<V> {
@@ -44,30 +44,50 @@ interface PromiseRefProps<V> {
 }
 
 /**
+ * 渲染器类型
+ */
+type Render<P extends PromiseRefProps<any>> = (props: P) => JSX.Element;
+
+/**
  * 插槽组件类型
- * @property displayName Slot 组件显示的名称
+ * @property displayName 组件名
  */
 type Slot = (() => JSX.Element | null) & {
   displayName?: string;
 };
 
 /**
- * 创建引用实例，`usePromiseRef` 是一个 Hook，因此必须在组件的顶层调用
- * @param render 渲染器（React 函数组件）
+ * 排除 PromiseRefProps 的类型
  */
-declare function usePromiseRef<P extends PromiseRefProps<any>> (render: (props: P) => JSX.Element): {
+type P<Props extends object> = Omit<Props, keyof PromiseRefProps<any>>;
+
+/**
+ * PromiseRef
+ */
+declare class PromiseRef<Props extends PromiseRefProps<any>> {
+
   /**
    * 组件渲染插槽。这是一个组件，可放在 tsx 中你想放的任意位置
    */
   Slot: Slot;
 
   /**
+   * @param render 渲染器（React 函数组件）
+   */
+  constructor (render: Render<Props>);
+
+  /**
    * 调用组件（将在插槽指定的位置渲染）
-   * 这会返回一个 promise，可以非常灵活的控制组件输入输出的流程
+   * 这会返回一个 promise，可以非常灵活的控制组件异步输入输出的流程
    * @param props
    */
-  render: (props?: Omit<P, 'resolve' | 'reject'>) => Promise<Parameters<P['resolve']>[0]>;
-};
+  render (props?: P<Props>): Promise<Parameters<Props['resolve']>[0]>;
+}
+
+export {
+  PromiseRef,
+  type PromiseRefProps,
+}
 ```
 
 ## 示例
@@ -138,7 +158,7 @@ export function AddUserDialog (props: Props) {
 // user-list.tsx
 
 import { useState } from 'react'
-import { usePromiseRef } from 'promise-ref'
+import { PromiseRef } from 'promise-ref'
 import { AddUserDialog, UserItem } from './add-user-dialog.tsx'
 
 export default function Home () {
@@ -148,7 +168,7 @@ export default function Home () {
    * 1. 创建引用实例
    * 建议这个引用实例的变量名称为：组件名 + Ref
    */
-  const AddUserDialogRef = uesPromiseRef(AddUserDialog)
+  const AddUserDialogRef = new PromiseRef(AddUserDialog)
 
   const handleAdd = async () => {
     /**

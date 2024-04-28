@@ -1,13 +1,32 @@
 import { type JSX, useState } from 'react';
 
+/**
+ * PromiseRef 组件的基础参数类型
+ * @property resolve Promise 的 resolve 回调函数
+ * @property reject Promise 的 reject 回调函数
+ */
 export interface PromiseRefProps<V> {
   resolve: (value: V) => void
   reject: (reason?: any) => void
 }
 
+/**
+ * 渲染器类型
+ */
+type Render<P extends PromiseRefProps<any>> = (props: P) => JSX.Element
+
+/**
+ * 插槽组件类型
+ * @property displayName 组件名
+ */
 type Slot = (() => JSX.Element | null) & {
   displayName?: string
 }
+
+/**
+ * 排除 PromiseRefProps 的类型
+ */
+type P<Props extends object> = Omit<Props, keyof PromiseRefProps<any>>
 
 /**
  * 创建空渲染插槽组件（初始值）
@@ -17,41 +36,50 @@ function createEmptySlot (): Slot {
 }
 
 /**
- * promiseRef 是一个基于 Promise 的 React 组件封装方式，旨在简化处理组件异步输入和输出的场景。
- * @param render 渲染器（React 函数组件）
+ * PromiseRef 构造器
  */
-export function usePromiseRef<P extends PromiseRefProps<any>> (render: (props: P) => JSX.Element) {
-  const [slot, setSlot] = useState<Slot>(createEmptySlot);
+export class PromiseRef<Props extends PromiseRefProps<any>> {
+  private readonly _render: Render<Props>;
+  private readonly _setSlot: (slot: () => Slot) => void;
 
-  // 给插槽组件设置名称，以便在 react 开发工具中排查问题
-  slot.displayName = render.name || 'PromiseRef.Slot';
-  
-  return {
-    /**
-     * 组件渲染插槽。这是一个组件，可放在 tsx 中你想放的任意位置
-     */
-    Slot: slot,
+  /**
+   * 组件渲染插槽。这是一个组件，可放在 tsx 中你想放的任意位置
+   */
+  Slot = createEmptySlot();
 
-    /**
-     * 调用组件（将在插槽指定的位置渲染）
-     * 这会返回一个 promise，可以非常灵活的控制组件输入输出的流程
-     * @param props
-     */
-    render: (props?: Omit<P, 'resolve' | 'reject'>) => {
-      const promise = new Promise<Parameters<P['resolve']>[0]>((resolve, reject) => {
-        setSlot(() => () => render({
-          ...(props || <any>{}),
-          resolve,
-          reject,
-        }));
-      });
+  /**
+   * @param render 渲染器（React 函数组件）
+   */
+  constructor (render: Render<Props>) {
+    const [slot, setSlot] = useState<Slot>(createEmptySlot);
 
-      // 完成后销毁组件
-      promise.finally(() => {
-        setSlot(createEmptySlot);
-      });
+    // 设置组件名
+    slot.displayName = render.name || 'PromiseRef.Slot';
 
-      return promise;
-    },
-  };
+    this._render = render;
+    this._setSlot = setSlot;
+    this.Slot = slot;
+  }
+
+  /**
+   * 调用组件（将在插槽指定的位置渲染）
+   * 这会返回一个 promise，可以非常灵活的控制组件异步输入输出的流程
+   * @param props
+   */
+  render (props?: P<Props>) {
+    const promise = new Promise<Parameters<Props['resolve']>[0]>((resolve, reject) => {
+      this._setSlot(() => () => this._render({
+        ...(props || <any>{}),
+        resolve,
+        reject,
+      }));
+    });
+
+    // 完成后销毁组件
+    promise.finally(() => {
+      this._setSlot(createEmptySlot);
+    });
+
+    return promise;
+  }
 }
