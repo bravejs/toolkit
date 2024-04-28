@@ -11,6 +11,10 @@
   ],
   "author": "shixianqin",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bravejs/toolkit.git"
+  },
   "homepage": "https://github.com/bravejs/toolkit/tree/main/packages/promise-ref",
   "peerDependencies": {
     "react": "^18"
