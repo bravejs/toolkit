@@ -2,6 +2,12 @@
 
 PromiseRef 是一个基于 Promise 的 React 组件封装方式，旨在简化处理组件异步输入和输出的场景。
 
+## 安装
+
+```bash
+npm i promise-ref
+```
+
 ## 功能特点
 
 #### 基于 Promise 的调用方式
@@ -54,7 +60,7 @@ declare function usePromiseRef<P extends PromiseRefProps<any>> (render: (props: 
    * 组件渲染插槽。这是一个组件，可放在 tsx 中你想放的任意位置
    */
   Slot: Slot;
-  
+
   /**
    * 调用组件（将在插槽指定的位置渲染）
    * 这会返回一个 promise，可以非常灵活的控制组件输入输出的流程
@@ -86,7 +92,7 @@ interface Props extends PromiseRefProps<UserItem> {
   user?: UserItem // 传入 user 参数即视为编辑模式
 }
 
-export default function AddUserDialog (props: Props) {
+export function AddUserDialog (props: Props) {
   const [formData, setFormData] = useState<UserItem>({
     name: '',
     age: 0,
@@ -140,6 +146,7 @@ export default function Home () {
 
   /**
    * 1. 创建引用实例
+   * 建议这个引用实例的变量名称为：组件名 + Ref
    */
   const AddUserDialogRef = uesPromiseRef(AddUserDialog)
 
