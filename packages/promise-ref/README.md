@@ -97,7 +97,7 @@ export {
 ```tsx
 // add-user-dialog.tsx
 
-import { useState } from 'react'
+import { FormEvent, useState } from 'react'
 import { PromiseRefProps } from 'promise-ref'
 
 export interface UserItem {
@@ -119,10 +119,10 @@ export function AddUserDialog (props: Props) {
     ...props.user, // 如果是编辑，则填充默认值
   })
 
-  const handleInput = (key: keyof UserItem, evt: InputEvent) => {
+  const handleInput = (key: keyof UserItem, evt: FormEvent) => {
     setFormData({
       ...formData,
-      [key]: evt.target.value,
+      [key]: (evt.target as HTMLInputElement).value,
     })
   }
 
@@ -131,21 +131,28 @@ export function AddUserDialog (props: Props) {
   }
 
   const handleSubmit = () => {
-    if (formData.name && formData.age) {
-      props.resolve(formData)
-    } else {
-      alert('表单验证失败！')
-    }
+    if (!formData.name) return alert('请输入 Name')
+    if (!formData.age) return alert('请输入 Age')
+
+    props.resolve(formData)
   }
 
   return (
-    <dialog>
+    <dialog style={{ display: 'block' }}>
       <form>
-        <input value={formData.name} onInput={(evt) => handleInput('name', evt)} type="text"/>
-        <input value={formData.age} onInput={(evt) => handleInput('age', evt)} type="number" min={0}/>
+        <div>
+          <span>Name: </span>
+          <input value={formData.name} onInput={(evt) => handleInput('name', evt)} type="text"/>
+        </div>
+
+        <div>
+          <span>Age: </span>
+          <input value={formData.age} onInput={(evt) => handleInput('age', evt)} type="number" min={0}/>
+        </div>
       </form>
 
-      <div>
+      <div style={{ textAlign: 'right' }}>
+        <br/>
         <button onClick={handleCancel}>Cancel</button>
         <button onClick={handleSubmit}>Submit</button>
       </div>
@@ -159,9 +166,9 @@ export function AddUserDialog (props: Props) {
 
 import { useState } from 'react'
 import { PromiseRef } from 'promise-ref'
-import { AddUserDialog, UserItem } from './add-user-dialog.tsx'
+import { AddUserDialog, UserItem } from './add-user-dialog'
 
-export default function Home () {
+export function UserList () {
   const [userList, setUserList] = useState<UserItem[]>([])
 
   /**
@@ -175,6 +182,7 @@ export default function Home () {
      * 3.1. 调用组件
      */
     const newUser = await AddUserDialogRef.render()
+
     setUserList([...userList, newUser])
   }
 
@@ -185,6 +193,7 @@ export default function Home () {
     const newUser = await AddUserDialogRef.render({
       user: item,
     })
+
     setUserList((prevUserList) => {
       return prevUserList.map((userItem, index) => {
         return index === editIndex ? newUser : userItem
@@ -194,16 +203,18 @@ export default function Home () {
 
   return (
     <>
-      <ul>
-        {
-          userList.map((item, index) => (
-            <li>
-              <div>Name: {item.name}, Age: {item.age}</div>
+      <h1>User List</h1>
+
+      <ul>{
+        userList.map((item, index) => (
+          <li key={index}>
+            <div>
               <button onClick={() => handleEdit(item, index)}>Edit</button>
-            </li>
-          ))
-        }
-      </ul>
+              <span>Name: {item.name}, Age: {item.age}</span>
+            </div>
+          </li>
+        ))
+      }</ul>
 
       <button onClick={handleAdd}>Add</button>
 
