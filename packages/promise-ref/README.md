@@ -7,7 +7,7 @@ PromiseRef 是一个基于 Promise 的 React 组件封装方式，旨在简化�
 #### 基于 Promise 的调用方式
 
 PromiseRef 采用基于 Promise 的调用方式，这样我们就可以灵活的控制组件的异步输入和输出流程。组件内部会在适当的时机调用
-resolve 或 reject 方法来返回结果。这种调用方式遵循了一种规范化的异步操作模式，使得组件的使用和管理变得更加可靠和一致。
+resolve 或 reject 回调来返回结果。这种调用方式遵循了一种规范化的异步操作模式，使得组件的使用和管理变得更加可靠和一致。
 
 #### 调用的独立性
 
@@ -28,55 +28,40 @@ PromiseRef 更加适用于临时性和一次性的场景，同时也能提升程
 import { type JSX } from 'react'
 
 /**
- * 组件渲染器类型
- * @param props 组件接收的参数
- * @param resolve Promise 的 resolve 回调函数
- * @param reject Promise 的 reject 回调函数
+ * PromiseRef 组件基本参数
+ * @property resolve Promise 的 resovle 回调函数
+ * @property reject Promise 的 reject 回调函数
  */
-type Render<Props, Value> = (
-  props: Props,
-  resolve: (value: Value) => void,
-  reject: (reason?: any) => void
-) => JSX.Element;
+interface PromiseRefProps<V> {
+  resolve: (value: V) => void;
+  reject: (reason?: any) => void;
+}
 
 /**
- * 插槽类型
+ * 插槽组件类型
+ * @property displayName Slot 组件显示的名称
  */
 type Slot = (() => JSX.Element | null) & {
   displayName?: string;
 };
 
-declare class PromiseRef<Props extends object, Value> {
+/**
+ * 创建引用实例，`usePromiseRef` 是一个 Hook，因此必须在组件的顶层调用
+ * @param render 渲染器（React 函数组件）
+ */
+declare function usePromiseRef<P extends PromiseRefProps<any>> (render: (props: P) => JSX.Element): {
   /**
    * 组件渲染插槽。这是一个组件，可放在 tsx 中你想放的任意位置
    */
-  Slot: Slot
-
-  /**
-   * PromiseRef 构造
-   * @param render 渲染器，其实就是 React 的函数组件
-   */
-  constructor (render: Render<Props, Value>);
-
-  /**
-   * 克隆出一个全新的独立的引用
-   */
-  clone (): PromiseRef<Props, Value>;
-
-  /**
-   * 初始化引用。这是一个 Hook，必须在 组件的顶层 调用
-   */
-  use (): void;
-
+  Slot: Slot;
+  
   /**
    * 调用组件（将在插槽指定的位置渲染）
-   * 这会返回一个 promise，可以非常灵活的控制功能逻辑
-   * @param props 组件接收的参数
+   * 这会返回一个 promise，可以非常灵活的控制组件输入输出的流程
+   * @param props
    */
-  render (props?: Props): Promise<Value>;
-}
-
-export { PromiseRef }
+  render: (props?: Omit<P, 'resolve' | 'reject'>) => Promise<Parameters<P['resolve']>[0]>;
+};
 ```
 
 ## 示例
@@ -87,23 +72,21 @@ export { PromiseRef }
 // add-user-dialog.tsx
 
 import { useState } from 'react'
-import { PromiseRef } from 'promise-ref'
+import { PromiseRefProps } from 'promise-ref'
 
 export interface UserItem {
   name: string
   age: number
 }
 
-interface Props {
+/**
+ * props 参数必须继承 PromiseRefProps 类型
+ */
+interface Props extends PromiseRefProps<UserItem> {
   user?: UserItem // 传入 user 参数即视为编辑模式
 }
 
-/**
- * 通过 `new PromiseRef()` 方式创建组件
- * 组件实现和逻辑与 React 的函数组件一致，
- * 只是多了 resolve/reject 的两个回调函数，当然核心也是因为这个
- */
-export const AddUserDialog = new PromiseRef<Props, UserItem>((props, resolve, reject) => {
+export default function AddUserDialog (props: Props) {
   const [formData, setFormData] = useState<UserItem>({
     name: '',
     age: 0,
@@ -118,12 +101,12 @@ export const AddUserDialog = new PromiseRef<Props, UserItem>((props, resolve, re
   }
 
   const handleCancel = () => {
-    reject()
+    props.reject()
   }
 
   const handleSubmit = () => {
     if (formData.name && formData.age) {
-      resolve(formData)
+      props.resolve(formData)
     } else {
       alert('表单验证失败！')
     }
@@ -142,31 +125,37 @@ export const AddUserDialog = new PromiseRef<Props, UserItem>((props, resolve, re
       </div>
     </dialog>
   )
-})
+}
 ```
 
 ```tsx
 // user-list.tsx
 
 import { useState } from 'react'
+import { usePromiseRef } from 'promise-ref'
 import { AddUserDialog, UserItem } from './add-user-dialog.tsx'
 
 export default function Home () {
   const [userList, setUserList] = useState<UserItem[]>([])
 
+  /**
+   * 1. 创建引用实例
+   */
+  const AddUserDialogRef = uesPromiseRef(AddUserDialog)
+
   const handleAdd = async () => {
     /**
-     * 调用组件
+     * 3.1. 调用组件
      */
-    const newUser = await AddUserDialog.render()
+    const newUser = await AddUserDialogRef.render()
     setUserList([...userList, newUser])
   }
 
   const handleEdit = async (item: UserItem, editIndex: number) => {
     /**
-     * 调用组件，并传入参数（编辑模式）
+     * 3.2. 调用组件，并传入参数（编辑模式）
      */
-    const newUser = await AddUserDialog.render({
+    const newUser = await AddUserDialogRef.render({
       user: item,
     })
     setUserList((prevUserList) => {
@@ -175,11 +164,6 @@ export default function Home () {
       })
     })
   }
-
-  /**
-   * 初始化组件，在顶层调用 `use` Hook（必须）
-   */
-  AddUserDialog.use()
 
   return (
     <>
@@ -197,8 +181,8 @@ export default function Home () {
       <button onClick={handleAdd}>Add</button>
 
       {
-        /** 组件渲染插槽（必须） */
-        <AddUserDialog.Slot/>
+        /** 2. 组件渲染插槽（必须） */
+        <AddUserDialogRef.Slot/>
       }
     </>
   )
