@@ -1,95 +1,142 @@
-import {
-  Subscriber,
-  SubscriptionCallbacks,
-  SubscriptionOptions,
-} from './types';
+import { Connection } from './connection';
 
-class Subscription<Params, Data> {
-  private _options: SubscriptionOptions<Params>;
-  private _callbacks: SubscriptionCallbacks;
-  private _subscribers: Subscriber<Params>[] = [];
+export interface MergedParams<T> {
+  current: T
+  changed: T
+}
 
-  constructor(
-    options: SubscriptionOptions<Params>,
-    callbacks: SubscriptionCallbacks
-  ) {
+export interface SplitParams<T> {
+  current: T | null
+  changed: T
+}
+
+export interface SubscriptionOptions<T, P, D extends T> {
+  recognize: (data: T) => boolean // 识别
+
+  subscribe?: (params: MergedParams<P>, start?: boolean) => void
+  unsubscribe?: (params: SplitParams<P>, end?: boolean) => void
+
+  mergeParams?: (current: P, target: P) => MergedParams<P>; // 参数组合
+  splitParams?: (current: P, target: P) => SplitParams<P>; // 参数分离
+
+  filterByParams?: (params: P, data: D) => D | null; // 根据参数过滤数据
+}
+
+export interface Subscriber<P> {
+  update: (params: P) => void;
+  cancel: () => void;
+}
+
+export class Subscription<T, P, D extends T> {
+  private _connection: Connection<D>;
+  private _options: SubscriptionOptions<T, P, D>;
+  private _params: P | null = null;
+  private _listeners = new Set<(data: D) => void>();
+
+  private _ondata = (evt: MessageEvent<D>) => {
+    if (this._options.recognize(evt.data)) {
+      for (const listener of this._listeners) {
+        listener(evt.data);
+      }
+    }
+  };
+
+  constructor (connection: Connection<any>, options: SubscriptionOptions<T, P, D>) {
+    this._connection = connection;
     this._options = options;
-    this._callbacks = callbacks;
   }
 
-  /**
-   * 获取订阅参数
-   * 来自所有订阅者的参数合并结果
-   * 可能存在相同参数的订阅者，去重逻辑需要在配置层手动处理，因为数据合并逻辑千变万化，无法统一处理
-   */
-  get params(): Readonly<Params> {
-    return this._options.mergeParams(
-      this._subscribers.map((item) => {
-        return item.params;
-      })
-    );
+  renew () {
+    const { _params, _options: { subscribe } } = this;
+
+    if (_params && subscribe && this._listeners.size > 0 && this._connection.ready) {
+      subscribe({
+        current: _params,
+        changed: _params,
+      }, true);
+    }
   }
 
-  subscribe(params: Params, handler: (data: Data) => void): Subscriber<Params> {
-    const { _options, _subscribers, _callbacks } = this;
+  subscribe (params: P, listener: (data: D) => void): Subscriber<P> {
+    const { _connection, _options, _listeners, _ondata } = this;
+    const { filterByParams } = _options;
 
-    const subscriber: Subscriber<Params> = {
-      params,
+    let changedParams: P = params;
 
-      update: (params) => {
-        if (cancelled) {
-          return;
+    if (filterByParams) {
+      const _listener = listener;
+
+      listener = (data) => {
+        const _data = filterByParams(changedParams, data);
+
+        if (_data !== null) {
+          _listener(_data);
         }
+      };
+    }
 
-        update('remove'); // 移除旧参数，触发 `update:remove`
-        subscriber.params = params;
-        update('add'); // 加入新参数，触发 `update:add`
+    const subscribe = (start?: boolean) => {
+      let params: MergedParams<P>;
+
+      if (this._params && _options.mergeParams) {
+        params = _options.mergeParams(this._params, changedParams);
+      } else {
+        params = { current: changedParams, changed: changedParams };
+      }
+
+      this._params = params.current;
+
+      if (start) {
+        _connection.on('data', _ondata);
+      }
+
+      if (_connection.ready && _options.subscribe) {
+        _options.subscribe(params, start);
+      }
+    };
+
+    const unsubscribe = (end?: boolean) => {
+      let params: SplitParams<P>;
+
+      if (this._params && _options.splitParams) {
+        params = _options.splitParams(this._params, changedParams);
+      } else {
+        params = { current: null, changed: changedParams };
+      }
+
+      this._params = params.current;
+
+      if (end) {
+        _connection.off('data', _ondata);
+      }
+
+      if (_connection.ready && _options.unsubscribe) {
+        _options.unsubscribe(params, end);
+      }
+    };
+
+    _listeners.add(listener);
+    _connection.dispatchSLC(1);
+
+    subscribe(_listeners.size === 1);
+
+    return {
+      update: (params: P) => {
+        if (_listeners.has(listener)) {
+          subscribe();
+          changedParams = params;
+          subscribe();
+        }
       },
 
       cancel: () => {
-        if (cancelled) {
-          return;
+        if (_listeners.has(listener)) {
+          _listeners.delete(listener);
+          _connection.dispatchSLC(-1);
+
+          unsubscribe(_listeners.size === 0);
         }
-
-        cancelled = true;
-        _subscribers.splice(_subscribers.indexOf(subscriber), 1);
-
-        if (_subscribers.length === 0) {
-          // 已取消全部订阅，触发 `unsubscribe`
-          _options.unsubscribe(subscriber.params);
-        } else {
-          // 仍然存在其他订阅，触发 `update:remove`
-          update('remove');
-        }
-
-        _callbacks.remove(handler);
       },
     };
-
-    const update = (type: 'add' | 'remove') => {
-      _options.update(type, subscriber.params, this.params);
-    };
-
-    // 标记当前实例是否已经取消
-    // 主要作用是防止外部重复调用 update 或者 cancel 方法
-    let cancelled = false;
-
-    /**
-     * start
-     */
-    _callbacks.add(handler);
-    _subscribers.push(subscriber);
-
-    if (_subscribers.length === 1) {
-      // 首次订阅，触发 `subscribe`
-      _options.subscribe(subscriber.params);
-    } else {
-      // 非首次订阅，触发 `update:add`
-      update('add');
-    }
-
-    return subscriber;
   }
 }
-
-export default Subscription;
