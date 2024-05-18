@@ -12,5 +12,10 @@
     "dist"
   ],
   "author": "shixianqin",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "^18",
+    "react": "^18",
+    "vue": "^3"
+  }
 }
