@@ -18,24 +18,24 @@ export const Heartbeat: PluginOptions<Options> = {
       },
     } = options || {};
 
-    let pingTimer: any;
-
-    function clear () {
+    const clear = () => {
       clearTimeout(pingTimer);
-    }
+    };
 
-    function start () {
+    const start = () => {
       clear();
       pingTimer = setTimeout(onTimeout, interval);
-    }
+    };
 
-    function handleMessage (evt: MessageEvent) {
+    const handleMessage = (evt: MessageEvent) => {
       if (onMessage) {
         onMessage(evt);
       }
 
       start();
-    }
+    };
+
+    let pingTimer: any;
 
     connection.on('open', start)
       .on('message', handleMessage)

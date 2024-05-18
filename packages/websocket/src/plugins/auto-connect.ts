@@ -1,5 +1,5 @@
 import { PluginOptions } from '../connection';
-import { SLCChangeEvent } from '../event-target';
+import { SLCChangeEvent } from '../connection-event-target';
 
 interface Options {
   autoClose?: boolean | number
@@ -10,25 +10,17 @@ export const AutoConnect: PluginOptions<Options> = {
   name: 'AutoConnect',
 
   install (connection, options) {
-    let reconnectTimer: any;
-    let closeTimer: any;
-
-    function getDelay (k: keyof Options): number {
+    const getDelay = (k: keyof Options) => {
       const value = options?.[k];
+      return value === false ? 0 : typeof value === 'number' ? value : 5000;
+    };
 
-      if (value === false) {
-        return 0;
-      }
-
-      return (!value || value === true) ? 5000 : value;
-    }
-
-    function clear () {
+    const clear = () => {
       clearTimeout(closeTimer);
       clearTimeout(reconnectTimer);
-    }
+    };
 
-    function handleClose (evt: CloseEvent) {
+    const handleClose = (evt: CloseEvent) => {
       clear();
 
       // Normal close
@@ -43,9 +35,9 @@ export const AutoConnect: PluginOptions<Options> = {
           connection.open();
         }, delay);
       }
-    }
+    };
 
-    function handleSLCChange (evt: SLCChangeEvent) {
+    const handleSLCChange = (evt: SLCChangeEvent) => {
       const { slc, action } = evt.detail;
 
       clear();
@@ -69,14 +61,17 @@ export const AutoConnect: PluginOptions<Options> = {
           }, delay);
         }
       }
-    }
+    };
 
-    connection.on('SLCChange', handleSLCChange)
+    let closeTimer: any;
+    let reconnectTimer: any;
+
+    connection.on('slcchange', handleSLCChange)
       .on('close', handleClose)
       .on('open', clear);
 
     return () => {
-      connection.off('SLCChange', handleSLCChange)
+      connection.off('slcchange', handleSLCChange)
         .off('close', handleClose)
         .off('open', clear);
     };

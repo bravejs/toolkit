@@ -9,13 +9,13 @@ export const VisibilityChange: PluginOptions = {
       return () => {};
     }
 
-    function handleChange () {
+    const handleChange = () => {
       if (document.visibilityState === 'hidden') {
         connection.close();
       } else if (connection.slc > 0) {
         connection.open();
       }
-    }
+    };
 
     window.addEventListener('visibilitychange', handleChange);
 

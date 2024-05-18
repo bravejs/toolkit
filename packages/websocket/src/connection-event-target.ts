@@ -7,7 +7,7 @@ export interface SLCChangeEvent extends CustomEvent<{
 
 export interface ConnectionEventMap<Data> extends WebSocketEventMap {
   data: MessageEvent<Data>
-  SLCChange: SLCChangeEvent
+  slcchange: SLCChangeEvent
 }
 
 export interface ConnectionListener<K extends keyof ConnectionEventMap<Data>, Data> {
@@ -73,7 +73,7 @@ export class ConnectionEventTarget<Data> {
   }
 
   dispatchSLC (action: DispatchSLCAction) {
-    this.dispatchEvent(new CustomEvent('SLCChange', {
+    this.dispatchEvent(new CustomEvent('slcchange', {
       detail: {
         action: action,
         slc: this.slc += action,

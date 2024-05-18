@@ -1,142 +1,191 @@
 import { Connection } from './connection';
 
 export interface MergedParams<T> {
-  current: T
-  changed: T
+  current: T;
+  changed: T;
 }
 
 export interface SplitParams<T> {
-  current: T | null
-  changed: T
+  current: T | null;
+  changed: T;
 }
 
 export interface SubscriptionOptions<T, P, D extends T> {
-  recognize: (data: T) => boolean // 识别
+  recognize: (data: T) => boolean;
 
-  subscribe?: (params: MergedParams<P>, start?: boolean) => void
-  unsubscribe?: (params: SplitParams<P>, end?: boolean) => void
+  subscribe?: (params: MergedParams<P>, start?: boolean) => void;
+  unsubscribe?: (params: SplitParams<P>, end?: boolean) => void;
 
-  mergeParams?: (current: P, target: P) => MergedParams<P>; // 参数组合
-  splitParams?: (current: P, target: P) => SplitParams<P>; // 参数分离
+  mergeParams?: (current: P, target: P) => MergedParams<P>;
+  splitParams?: (current: P, target: P) => SplitParams<P>;
 
-  filterByParams?: (params: P, data: D) => D | null; // 根据参数过滤数据
+  filterByParams?: (params: P, data: D) => D | null;
 }
 
 export interface Subscriber<P> {
+  params: P;
   update: (params: P) => void;
   cancel: () => void;
+}
+
+export interface SubscriberListener<D> {
+  (data: D): void;
+
+  __proxy?: SubscriberListener<D>;
 }
 
 export class Subscription<T, P, D extends T> {
   private _connection: Connection<D>;
   private _options: SubscriptionOptions<T, P, D>;
   private _params: P | null = null;
-  private _listeners = new Set<(data: D) => void>();
+  private _subscribers = new Map<Subscriber<P>, SubscriberListener<D>>();
 
-  private _ondata = (evt: MessageEvent<D>) => {
-    if (this._options.recognize(evt.data)) {
-      for (const listener of this._listeners) {
-        listener(evt.data);
+  private readonly _ondata = (evt: MessageEvent<D>) => {
+    const { _options, _subscribers } = this;
+
+    if (_options.recognize(evt.data)) {
+      for (const [, listener] of _subscribers) {
+        const fn = listener.__proxy || listener;
+        fn(evt.data);
       }
     }
   };
 
-  constructor (connection: Connection<any>, options: SubscriptionOptions<T, P, D>) {
+  constructor (
+    connection: Connection<any>,
+    options: SubscriptionOptions<T, P, D>,
+  ) {
     this._connection = connection;
     this._options = options;
   }
 
   renew () {
-    const { _params, _options: { subscribe } } = this;
+    const { _connection, _subscribers, _params, _options } = this;
 
-    if (_params && subscribe && this._listeners.size > 0 && this._connection.ready) {
-      subscribe({
-        current: _params,
-        changed: _params,
-      }, true);
+    if (_options.subscribe && _subscribers.size > 0 && _connection.ready) {
+      _options.subscribe(
+        {
+          current: _params!,
+          changed: _params!,
+        },
+        true,
+      );
     }
   }
 
-  subscribe (params: P, listener: (data: D) => void): Subscriber<P> {
-    const { _connection, _options, _listeners, _ondata } = this;
+  // 创建订阅者
+  subscribe (params: P, listener: SubscriberListener<D>): Subscriber<P> {
+    const { _connection, _subscribers, _options } = this;
     const { filterByParams } = _options;
 
-    let changedParams: P = params;
+    const subscriber: Subscriber<P> = {
+      params,
 
-    if (filterByParams) {
-      const _listener = listener;
-
-      listener = (data) => {
-        const _data = filterByParams(changedParams, data);
-
-        if (_data !== null) {
-          _listener(_data);
-        }
-      };
-    }
-
-    const subscribe = (start?: boolean) => {
-      let params: MergedParams<P>;
-
-      if (this._params && _options.mergeParams) {
-        params = _options.mergeParams(this._params, changedParams);
-      } else {
-        params = { current: changedParams, changed: changedParams };
-      }
-
-      this._params = params.current;
-
-      if (start) {
-        _connection.on('data', _ondata);
-      }
-
-      if (_connection.ready && _options.subscribe) {
-        _options.subscribe(params, start);
-      }
-    };
-
-    const unsubscribe = (end?: boolean) => {
-      let params: SplitParams<P>;
-
-      if (this._params && _options.splitParams) {
-        params = _options.splitParams(this._params, changedParams);
-      } else {
-        params = { current: null, changed: changedParams };
-      }
-
-      this._params = params.current;
-
-      if (end) {
-        _connection.off('data', _ondata);
-      }
-
-      if (_connection.ready && _options.unsubscribe) {
-        _options.unsubscribe(params, end);
-      }
-    };
-
-    _listeners.add(listener);
-    _connection.dispatchSLC(1);
-
-    subscribe(_listeners.size === 1);
-
-    return {
       update: (params: P) => {
-        if (_listeners.has(listener)) {
-          subscribe();
-          changedParams = params;
-          subscribe();
+        if (_subscribers.has(subscriber)) {
+          // 1. Unsubscribe from the old parameters
+          this._unsubscribe(subscriber);
+
+          // 2. Set the new parameters
+          subscriber.params = params;
+
+          // 3. Subscribe to new parameters
+          this._subscribe(subscriber);
         }
       },
 
       cancel: () => {
-        if (_listeners.has(listener)) {
-          _listeners.delete(listener);
+        if (_subscribers.has(subscriber)) {
+          _subscribers.delete(subscriber);
           _connection.dispatchSLC(-1);
 
-          unsubscribe(_listeners.size === 0);
+          if (filterByParams) {
+            delete listener.__proxy;
+          }
+
+          this._unsubscribe(subscriber, _subscribers.size === 0);
         }
       },
     };
+
+    if (filterByParams) {
+      listener.__proxy = (data) => {
+        const _data = filterByParams.apply(_options, [subscriber.params, data]);
+
+        if (_data !== null) {
+          listener(_data);
+        }
+      };
+    }
+
+    _subscribers.set(subscriber, listener);
+    _connection.dispatchSLC(1);
+
+    this._subscribe(subscriber, _subscribers.size === 1);
+
+    return subscriber;
+  }
+
+  private _subscribe (subscriber: Subscriber<P>, start?: boolean) {
+    const { _connection, _options } = this;
+    const current = this._getCurrentParams(subscriber);
+    const changed = subscriber.params;
+    let mergedParams: MergedParams<P>;
+
+    if (current && _options.mergeParams) {
+      mergedParams = _options.mergeParams(current, changed);
+    } else {
+      mergedParams = { current: changed, changed };
+    }
+
+    this._params = mergedParams.current;
+
+    if (start) {
+      _connection.on('data', this._ondata);
+    }
+
+    if (_options.subscribe && _connection.ready) {
+      _options.subscribe(mergedParams, start);
+    }
+  }
+
+  private _unsubscribe (subscriber: Subscriber<P>, end?: boolean) {
+    const { _connection, _options } = this;
+    const current = this._getCurrentParams(subscriber);
+    const changed = subscriber.params;
+    let splitParams: SplitParams<P>;
+
+    if (current && _options.splitParams) {
+      splitParams = _options.splitParams(current, changed);
+    } else {
+      splitParams = { current: null, changed };
+    }
+
+    this._params = splitParams.current;
+
+    if (end) {
+      _connection.off('data', this._ondata);
+    }
+
+    if (_options.unsubscribe && _connection.ready) {
+      _options.unsubscribe(splitParams, end);
+    }
+  }
+
+  private _getCurrentParams (subscriber: Subscriber<P>) {
+    const { _subscribers, _options } = this;
+    let currentParams: P | null = null;
+
+    if (_options.mergeParams) {
+      for (const [item] of _subscribers) {
+        if (item !== subscriber) {
+          currentParams = currentParams
+            ? _options.mergeParams(currentParams, item.params).current
+            : item.params;
+        }
+      }
+    }
+
+    return currentParams;
   }
 }

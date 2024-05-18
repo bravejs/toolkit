@@ -1,4 +1,4 @@
-import { ConnectionEventTarget } from './event-target';
+import { ConnectionEventTarget } from './connection-event-target';
 import { Subscription, SubscriptionOptions } from './subscription';
 
 export interface ConnectionOptions<D> {

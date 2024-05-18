@@ -1,10 +1,10 @@
-import { MergedParams, SplitParams } from './subscription';
+import { MergedParams, SplitParams } from '../subscription';
 
 export const IN_BROWSER = typeof window !== 'undefined';
 
 export function cached<T> (key: string, creator: () => T): T {
   const root: any = IN_BROWSER ? window : {};
-  key = `__WS_CACHED_${key}__`;
+  key = `__WEB_SOCKET_CACHED_${key}__`;
   return root[key] || (root[key] = creator());
 }
 
@@ -30,7 +30,7 @@ export function splitArray<T> (current: T[], target: T[], findIndex?: (current: 
   const changed: T[] = [];
 
   current = [...current];
-  
+
   for (const targetItem of target) {
     const index = findIndex ? findIndex(current, targetItem) : current.indexOf(targetItem);
 
