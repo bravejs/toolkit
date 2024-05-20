@@ -1,15 +1,16 @@
 import { PluginOptions } from '../connection';
-import { SLCChangeEvent } from '../connection-event-target';
+import { SubsChangeEvent } from '../connection-event-target';
 
 interface Options {
-  autoClose?: boolean | number
-  autoReconnect?: boolean | number
+  autoOpen?: boolean;
+  autoClose?: boolean | number;
+  autoReconnect?: boolean | number;
 }
 
 export const AutoConnect: PluginOptions<Options> = {
   name: 'AutoConnect',
 
-  install (connection, options) {
+  install(connection, options) {
     const getDelay = (k: keyof Options) => {
       const value = options?.[k];
       return value === false ? 0 : typeof value === 'number' ? value : 5000;
@@ -30,32 +31,30 @@ export const AutoConnect: PluginOptions<Options> = {
 
       const delay = getDelay('autoReconnect');
 
-      if (delay) {
+      if (delay > 0) {
         reconnectTimer = setTimeout(() => {
           connection.open();
         }, delay);
       }
     };
 
-    const handleSLCChange = (evt: SLCChangeEvent) => {
-      const { slc, action } = evt.detail;
+    const handleSubsChange = (evt: SubsChangeEvent) => {
+      const { subs, action } = evt.detail;
 
       clear();
 
       // Subscribe action
       if (action === 1) {
-        if (slc === 1) {
+        if (subs === 1 && options?.autoOpen !== false) {
           connection.open();
         }
-
-        return;
       }
 
       // Unsubscribe action
-      if (slc === 0) {
+      else if (subs === 0) {
         const delay = getDelay('autoClose');
 
-        if (delay) {
+        if (delay > 0) {
           closeTimer = setTimeout(() => {
             connection.close();
           }, delay);
@@ -66,12 +65,14 @@ export const AutoConnect: PluginOptions<Options> = {
     let closeTimer: any;
     let reconnectTimer: any;
 
-    connection.on('slcchange', handleSLCChange)
+    connection
+      .on('subschange', handleSubsChange)
       .on('close', handleClose)
       .on('open', clear);
 
     return () => {
-      connection.off('slcchange', handleSLCChange)
+      connection
+        .off('subschange', handleSubsChange)
         .off('close', handleClose)
         .off('open', clear);
     };

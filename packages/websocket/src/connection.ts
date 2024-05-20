@@ -3,17 +3,17 @@ import { Subscription, SubscriptionOptions } from './subscription';
 
 export interface ConnectionOptions<D> {
   url: string;
-  protocols?: string | string[]
-  binaryType?: BinaryType
+  protocols?: string | string[];
+  binaryType?: BinaryType;
   dataParser?: (data: any) => D | Promise<D>;
 }
 
 export interface PluginOptions<T = any> {
-  name: string
-  install: (connection: Connection<any>, options?: T) => () => void
+  name: string;
+  install: (connection: Connection<any>, options?: T) => () => void;
 }
 
-export type DataType = Parameters<WebSocket['send']>[0]
+export type DataType = Parameters<WebSocket['send']>[0];
 
 export class Connection<T> extends ConnectionEventTarget<T> {
   private _options: ConnectionOptions<T>;
@@ -21,25 +21,26 @@ export class Connection<T> extends ConnectionEventTarget<T> {
   private _queue: DataType[] = [];
   private _plugins: Record<string, () => void> = {};
   private _subscriptions: Record<string, Subscription<T, any, any>> = {};
+  private _lastDataSent: string = '';
 
-  constructor (options: ConnectionOptions<T>) {
+  constructor(options: ConnectionOptions<T>) {
     super();
     this._options = options;
   }
 
-  get readyState () {
+  get readyState() {
     return this._ws?.readyState;
   }
 
-  get ready () {
+  get ready() {
     return this.readyState === WebSocket.OPEN;
   }
 
-  get active () {
+  get active() {
     return this.ready || this.readyState === WebSocket.CONNECTING;
   }
 
-  open () {
+  open() {
     if (this.active) {
       return;
     }
@@ -113,7 +114,7 @@ export class Connection<T> extends ConnectionEventTarget<T> {
     this._ws = ws;
   }
 
-  nativeSend (data: DataType) {
+  nativeSend(data: DataType) {
     if (this.ready) {
       this._ws!.send(data);
     } else {
@@ -121,17 +122,27 @@ export class Connection<T> extends ConnectionEventTarget<T> {
     }
   }
 
-  send (data: any) {
-    this.nativeSend(typeof data === 'object' ? JSON.stringify(data) : data);
+  send(data: any, ignoreDuplicate?: boolean) {
+    if (typeof data !== 'string') {
+      data = JSON.stringify(data);
+    }
+
+    if (ignoreDuplicate && data === this._lastDataSent) {
+      return;
+    }
+
+    this._lastDataSent = data;
+
+    this.nativeSend(data);
   }
 
-  close (reason?: string) {
+  close(reason?: string) {
     if (this.active) {
       this._ws!.close(1000, reason); // CLOSE_NORMAL
     }
   }
 
-  destroy () {
+  destroy() {
     for (const uninstall of Object.values(this._plugins)) {
       uninstall();
     }
@@ -144,7 +155,7 @@ export class Connection<T> extends ConnectionEventTarget<T> {
     this._subscriptions = null as any;
   }
 
-  use<O extends object> (plugin: PluginOptions<O>, options?: O) {
+  use<O extends object>(plugin: PluginOptions<O>, options?: O) {
     const { _plugins } = this;
 
     if (!_plugins[plugin.name]) {
@@ -154,7 +165,7 @@ export class Connection<T> extends ConnectionEventTarget<T> {
     return this;
   }
 
-  unUse (plugin: PluginOptions) {
+  unUse(plugin: PluginOptions) {
     const { _plugins } = this;
     const uninstall = _plugins[plugin.name];
 
@@ -165,8 +176,11 @@ export class Connection<T> extends ConnectionEventTarget<T> {
 
     return this;
   }
-  
-  defineSubscription<P, D extends T = T> (name: string, options: SubscriptionOptions<T, P, D>): Subscription<T, P, D> {
+
+  defineSubscription<P, D extends T = T>(
+    name: string,
+    options: SubscriptionOptions<T, P, D>,
+  ): Subscription<T, P, D> {
     const map = this._subscriptions;
     return map[name] || (map[name] = new Subscription<T, P, D>(this, options));
   }

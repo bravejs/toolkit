@@ -9,12 +9,12 @@ interface Options {
 export const Heartbeat: PluginOptions<Options> = {
   name: 'Heartbeat',
 
-  install (connection, options) {
+  install(connection, options) {
     const {
       interval = 15000,
       onMessage,
       onTimeout = () => {
-        connection.send('ping');
+        connection.nativeSend('ping');
       },
     } = options || {};
 
@@ -37,12 +37,14 @@ export const Heartbeat: PluginOptions<Options> = {
 
     let pingTimer: any;
 
-    connection.on('open', start)
+    connection
+      .on('open', start)
       .on('message', handleMessage)
       .on('close', clear);
 
     return () => {
-      connection.off('open', start)
+      connection
+        .off('open', start)
         .off('message', handleMessage)
         .off('close', clear);
     };

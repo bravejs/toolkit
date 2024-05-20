@@ -4,7 +4,7 @@ import { IN_BROWSER } from '../utils';
 export const VisibilityChange: PluginOptions = {
   name: 'VisibilityChange',
 
-  install (connection) {
+  install(connection) {
     if (!IN_BROWSER) {
       return () => {};
     }
@@ -12,7 +12,7 @@ export const VisibilityChange: PluginOptions = {
     const handleChange = () => {
       if (document.visibilityState === 'hidden') {
         connection.close();
-      } else if (connection.slc > 0) {
+      } else if (connection.subs > 0) {
         connection.open();
       }
     };
