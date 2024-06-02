@@ -198,7 +198,7 @@ const result = mergeArray(current, target)
 + 当组件销毁时，会自动取消订阅
 
 ```ts
-import { toReactHook } from '@ws/core/integrations/react'
+import { toReactHook } from '@bravejs/websocket/integrations/react'
 
 // 创建 hook
 const useSubscription = toReactHook(subscription)
@@ -217,7 +217,7 @@ useSubscription([1, 2, 3], (data) => {
 + 当组件销毁时，会自动取消订阅
 
 ```ts
-import { toVueHook } from '@ws/core/integrations/vue'
+import { toVueHook } from '@bravejs/websocket/integrations/vue'
 
 // 创建 hook
 const useSubscription = toVueHook(subscription)
