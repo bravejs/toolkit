@@ -1,11 +1,13 @@
-import { MergedParams } from '../subscription';
+import { MergedParams } from './subscription';
 
 export const IN_BROWSER = typeof window !== 'undefined';
 
-export function cached<T>(key: string, creator: () => T): T {
+export function shared<T>(name: string, creator: () => T): T {
   const root: any = IN_BROWSER ? window : {};
-  key = `__WEB_SOCKET_CACHED_${key}__`;
-  return root[key] || (root[key] = creator());
+
+  name = `__WEB_SOCKET_CACHED_${name}__`;
+
+  return root[name] || (root[name] = creator());
 }
 
 export function mergeArray<T>(
@@ -27,5 +29,14 @@ export function mergeArray<T>(
   return {
     current,
     changed,
+  };
+}
+
+export function nextTick(handler: () => void) {
+  let timerId: number | NodeJS.Timeout;
+
+  return () => {
+    clearTimeout(timerId);
+    timerId = setTimeout(handler, 0);
   };
 }

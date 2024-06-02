@@ -1,3 +1,5 @@
+import { IN_BROWSER } from './utils';
+
 export type DispatchSubsAction = 1 | -1;
 
 export interface SubsChangeEvent
@@ -29,12 +31,14 @@ export class ConnectionEventTarget<Data> {
     type: K,
     listener: ConnectionListener<K, Data>,
   ) {
-    const fns = this._eventMap[type];
+    if (IN_BROWSER) {
+      const fns = this._eventMap[type];
 
-    if (fns) {
-      fns.add(listener);
-    } else {
-      this._eventMap[type] = new Set([listener]);
+      if (fns) {
+        fns.add(listener);
+      } else {
+        this._eventMap[type] = new Set([listener]);
+      }
     }
 
     return this;
@@ -63,13 +67,15 @@ export class ConnectionEventTarget<Data> {
     type: K,
     listener: ConnectionListener<K, Data>,
   ) {
-    listener.__proxy = (evt) => {
-      listener(evt);
-      this.off(type, listener);
-      delete listener.__proxy;
-    };
+    if (IN_BROWSER) {
+      listener.__proxy = (evt) => {
+        listener(evt);
+        this.off(type, listener);
+        delete listener.__proxy;
+      };
 
-    this.on(type, listener);
+      this.on(type, listener);
+    }
 
     return this;
   }
@@ -84,7 +90,7 @@ export class ConnectionEventTarget<Data> {
     }
   }
 
-  dispatchSubs(action: DispatchSubsAction) {
+  _dispatchSubs(action: DispatchSubsAction) {
     this.dispatchEvent(
       new CustomEvent('subschange', {
         detail: {

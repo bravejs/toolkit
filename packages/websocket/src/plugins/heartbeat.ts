@@ -1,22 +1,27 @@
 import { PluginOptions } from '../connection';
 
 interface Options {
-  interval?: number; // ms
-  onMessage?: (evt: MessageEvent) => void;
-  onTimeout?: () => void;
+  timeout?: number; // ms
+  ping?: () => void;
+  pong?: (data: any) => void;
 }
 
 export const Heartbeat: PluginOptions<Options> = {
   name: 'Heartbeat',
 
   install(connection, options) {
-    const {
-      interval = 15000,
-      onMessage,
-      onTimeout = () => {
+    const opts: Required<Options> = {
+      timeout: 15000,
+      ping: () => {
         connection.nativeSend('ping');
       },
-    } = options || {};
+      pong: (data) => {
+        if (data === 'ping') {
+          connection.nativeSend('pong');
+        }
+      },
+      ...options,
+    };
 
     const clear = () => {
       clearTimeout(pingTimer);
@@ -24,14 +29,11 @@ export const Heartbeat: PluginOptions<Options> = {
 
     const start = () => {
       clear();
-      pingTimer = setTimeout(onTimeout, interval);
+      pingTimer = setTimeout(opts.ping, opts.timeout);
     };
 
     const handleMessage = (evt: MessageEvent) => {
-      if (onMessage) {
-        onMessage(evt);
-      }
-
+      opts.pong(evt.data);
       start();
     };
 

@@ -1,4 +1,5 @@
 import { Connection } from './connection';
+import { nextTick } from './utils';
 
 export interface MergedParams<T> {
   current: T;
@@ -11,49 +12,39 @@ export interface SplitParams<T> {
 }
 
 export interface ActionFlags {
-  start?: boolean;
-  update?: boolean;
-  end?: boolean;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
 export interface SubscriptionOptions<T, P, D extends T> {
   recognize: (data: T) => boolean;
-
   subscribe?: (params: MergedParams<P>, flags: ActionFlags) => void;
   unsubscribe?: (params: SplitParams<P>, flags: ActionFlags) => void;
-
   mergeParams?: (current: P, target: P) => MergedParams<P>;
   filterByParams?: (params: P, data: D) => D | null;
 }
 
 export interface Subscriber<P> {
-  params: P;
+  start: (params: P) => void;
   update: (params: P) => void;
   cancel: () => void;
 }
 
-export interface SubscriberListener<D> {
-  (data: D): void;
+export type SubscriberListener<D> = (data: D) => void;
 
-  __proxy?: SubscriberListener<D>;
+interface SubscriberInner<P, D> extends Subscriber<P> {
+  _params: P;
+  _listener: SubscriberListener<D>;
 }
-
-type MergedResult<P> = null | { current: P; final: MergedParams<P> };
 
 export class Subscription<T, P, D extends T> {
   private _connection: Connection<D>;
   private _options: SubscriptionOptions<T, P, D>;
+  private _subscribers = new Set<SubscriberInner<P, D>>();
+  private _queueSubscribe = new Map<SubscriberInner<P, D>, P>();
+  private _queueUnsubscribe = new Map<SubscriberInner<P, D>, P>();
+  private _flags: ActionFlags = {};
   private _params: P | null = null;
-  private _subscribers = new Map<Subscriber<P>, SubscriberListener<D>>();
-
-  private readonly _ondata = (evt: MessageEvent<D>) => {
-    if (this._options.recognize(evt.data)) {
-      for (const [, listener] of this._subscribers) {
-        const fn = listener.__proxy || listener;
-        fn(evt.data);
-      }
-    }
-  };
 
   constructor(
     connection: Connection<any>,
@@ -61,6 +52,180 @@ export class Subscription<T, P, D extends T> {
   ) {
     this._connection = connection;
     this._options = options;
+  }
+
+  private _ondata = (evt: MessageEvent<D>) => {
+    const { _options, _subscribers } = this;
+    const { data } = evt;
+
+    if (_options.recognize(data)) {
+      for (const item of _subscribers) {
+        let _data: D | null = data;
+
+        if (_options.filterByParams) {
+          _data = _options.filterByParams(item._params, data);
+
+          if (_data === null) {
+            continue;
+          }
+        }
+
+        item._listener(_data);
+      }
+    }
+  };
+
+  private _nextTickAction = nextTick(() => {
+    this._action();
+  });
+
+  private _action() {
+    const {
+      _options,
+      _connection,
+      _subscribers,
+      _queueUnsubscribe,
+      _queueSubscribe,
+      _flags,
+    } = this;
+
+    const merge = (current: P | null | undefined, target: P) => {
+      if (current && _options.mergeParams) {
+        return _options.mergeParams(current, target);
+      }
+
+      return {
+        current: target,
+        changed: target,
+      };
+    };
+
+    let current: P | null = null;
+
+    /**
+     * merge current params
+     */
+    for (const subscriber of _subscribers) {
+      if (
+        _queueSubscribe.has(subscriber) ||
+        _queueUnsubscribe.has(subscriber)
+      ) {
+        continue;
+      }
+
+      current = merge(current, subscriber._params).current;
+    }
+
+    /**
+     * subscribe
+     */
+    if (_queueSubscribe.size > 0) {
+      let subscribeParams: P | null = null;
+
+      for (const [, itemParams] of _queueSubscribe) {
+        subscribeParams = merge(subscribeParams, itemParams).current;
+      }
+
+      _queueSubscribe.clear();
+
+      const mergedParams: MergedParams<P> = merge(current, subscribeParams!);
+
+      current = mergedParams.current;
+
+      if (_options.subscribe && _connection.ready) {
+        _options.subscribe(mergedParams, _flags);
+      }
+    }
+
+    /**
+     * unsubscribe
+     */
+    if (_queueUnsubscribe.size > 0) {
+      let unsubscribeParams: P | null = null;
+
+      for (const [, itemParams] of _queueUnsubscribe) {
+        unsubscribeParams = merge(unsubscribeParams, itemParams).current;
+      }
+
+      _queueUnsubscribe.clear();
+
+      if (_options.unsubscribe && _connection.ready) {
+        _options.unsubscribe(
+          {
+            current,
+            changed: merge(current, unsubscribeParams!).changed,
+          },
+          _flags,
+        );
+      }
+    }
+
+    // clear flags
+    if (_flags.isFirst || _flags.isLast) {
+      this._flags = {};
+    }
+
+    // update params
+    this._params = current;
+  }
+
+  subscribe(params: P, listener: SubscriberListener<D>): Subscriber<P> {
+    const {
+      _connection,
+      _subscribers,
+      _queueSubscribe,
+      _queueUnsubscribe,
+      _ondata,
+      _nextTickAction,
+    } = this;
+
+    const subscriber: SubscriberInner<P, D> = {
+      _params: params,
+      _listener: listener,
+
+      start: (params: P) => {
+        if (!_subscribers.has(subscriber)) {
+          _subscribers.add(subscriber);
+          _queueSubscribe.set(subscriber, params);
+          _connection._dispatchSubs(1);
+
+          if (_subscribers.size === 1) {
+            this._flags = { isFirst: true };
+            _connection.on('data', this._ondata);
+          }
+
+          _nextTickAction();
+        }
+      },
+
+      update: (params: P) => {
+        if (_subscribers.has(subscriber)) {
+          _queueUnsubscribe.set(subscriber, subscriber._params);
+          _queueSubscribe.set(subscriber, (subscriber._params = params));
+
+          _nextTickAction();
+        }
+      },
+
+      cancel: () => {
+        if (_subscribers.has(subscriber)) {
+          _subscribers.delete(subscriber);
+          _queueUnsubscribe.set(subscriber, subscriber._params);
+          _connection._dispatchSubs(-1);
+
+          if (_subscribers.size === 0) {
+            this._flags = { isLast: true };
+            _connection.off('data', _ondata);
+          }
+
+          _nextTickAction();
+        }
+      },
+    };
+
+    subscriber.start(params);
+
+    return subscriber;
   }
 
   renew() {
@@ -72,140 +237,10 @@ export class Subscription<T, P, D extends T> {
           current: _params!,
           changed: _params!,
         },
-        { start: true },
+        {
+          isFirst: true,
+        },
       );
     }
-  }
-
-  // 创建订阅者
-  subscribe(params: P, listener: SubscriberListener<D>): Subscriber<P> {
-    const { _connection, _subscribers, _options } = this;
-    const { filterByParams } = _options;
-
-    const subscriber: Subscriber<P> = {
-      params,
-
-      update: (params: P) => {
-        if (_subscribers.has(subscriber)) {
-          // 1. Unsubscribe from the old parameters
-          this._unsubscribe(subscriber, {
-            update: true,
-          });
-
-          // 2. Set the new parameters
-          subscriber.params = params;
-
-          // 3. Subscribe to new parameters
-          this._subscribe(subscriber, {
-            update: true,
-          });
-        }
-      },
-
-      cancel: () => {
-        if (_subscribers.has(subscriber)) {
-          _subscribers.delete(subscriber);
-          _connection.dispatchSubs(-1);
-
-          if (filterByParams) {
-            delete listener.__proxy;
-          }
-
-          this._unsubscribe(subscriber, {
-            end: _subscribers.size === 0,
-          });
-        }
-      },
-    };
-
-    if (filterByParams) {
-      listener.__proxy = (data) => {
-        const _data = filterByParams.apply(_options, [subscriber.params, data]);
-
-        if (_data !== null) {
-          listener(_data);
-        }
-      };
-    }
-
-    _subscribers.set(subscriber, listener);
-    _connection.dispatchSubs(1);
-
-    this._subscribe(subscriber, {
-      start: _subscribers.size === 1,
-    });
-
-    return subscriber;
-  }
-
-  private _subscribe(subscriber: Subscriber<P>, flags: ActionFlags) {
-    const { _connection, _options } = this;
-    const result = this._mergeParams(subscriber);
-
-    const mergedParams: MergedParams<P> = result
-      ? result.final
-      : {
-          current: subscriber.params,
-          changed: subscriber.params,
-        };
-
-    this._params = mergedParams.current;
-
-    if (flags.start) {
-      _connection.on('data', this._ondata);
-    }
-
-    if (_options.subscribe && _connection.ready) {
-      _options.subscribe(mergedParams, flags);
-    }
-  }
-
-  private _unsubscribe(subscriber: Subscriber<P>, flags: ActionFlags) {
-    const { _connection, _options } = this;
-    const result = this._mergeParams(subscriber);
-
-    const splitParams: SplitParams<P> = result
-      ? {
-          current: result.current,
-          changed: result.final.changed,
-        }
-      : {
-          current: null,
-          changed: subscriber.params,
-        };
-
-    this._params = splitParams.current;
-
-    if (flags.end) {
-      _connection.off('data', this._ondata);
-    }
-
-    if (_options.unsubscribe && _connection.ready) {
-      _options.unsubscribe(splitParams, flags);
-    }
-  }
-
-  private _mergeParams(subscriber: Subscriber<P>): MergedResult<P> {
-    const { _subscribers, _options } = this;
-    let current: P | null = null;
-
-    if (_options.mergeParams) {
-      for (const [item] of _subscribers) {
-        if (item !== subscriber) {
-          current = current
-            ? _options.mergeParams(current, item.params).current
-            : item.params;
-        }
-      }
-
-      if (current) {
-        return {
-          current,
-          final: _options.mergeParams(current, subscriber.params),
-        };
-      }
-    }
-
-    return null;
   }
 }

@@ -13,6 +13,7 @@ export const AutoConnect: PluginOptions<Options> = {
   install(connection, options) {
     const getDelay = (k: keyof Options) => {
       const value = options?.[k];
+
       return value === false ? 0 : typeof value === 'number' ? value : 5000;
     };
 

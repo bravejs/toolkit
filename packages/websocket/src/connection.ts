@@ -1,5 +1,7 @@
 import { ConnectionEventTarget } from './connection-event-target';
 import { Subscription, SubscriptionOptions } from './subscription';
+import { IN_BROWSER } from './utils';
+import { SSRSubscription } from './ssr';
 
 export interface ConnectionOptions<D> {
   url: string;
@@ -109,6 +111,7 @@ export class Connection<T> extends ConnectionEventTarget<T> {
       dispatch(evt);
 
       this._ws = null;
+      this._lastDataSent = '';
     };
 
     this._ws = ws;
@@ -117,17 +120,18 @@ export class Connection<T> extends ConnectionEventTarget<T> {
   nativeSend(data: DataType) {
     if (this.ready) {
       this._ws!.send(data);
-    } else {
+    } else if (IN_BROWSER) {
       this._queue.push(data);
     }
   }
 
-  send(data: any, ignoreDuplicate?: boolean) {
+  send(data: any, ignoreRepeatedly?: boolean) {
     if (typeof data !== 'string') {
       data = JSON.stringify(data);
     }
 
-    if (ignoreDuplicate && data === this._lastDataSent) {
+    // 当本次发送当数据和上一次是一样的时候，直接退出
+    if (ignoreRepeatedly && data === this._lastDataSent) {
       return;
     }
 
@@ -158,7 +162,8 @@ export class Connection<T> extends ConnectionEventTarget<T> {
   use<O extends object>(plugin: PluginOptions<O>, options?: O) {
     const { _plugins } = this;
 
-    if (!_plugins[plugin.name]) {
+    // 在浏览器环境中，才会安装插件
+    if (IN_BROWSER && !_plugins[plugin.name]) {
       _plugins[plugin.name] = plugin.install(this, options);
     }
 
@@ -181,7 +186,15 @@ export class Connection<T> extends ConnectionEventTarget<T> {
     name: string,
     options: SubscriptionOptions<T, P, D>,
   ): Subscription<T, P, D> {
-    const map = this._subscriptions;
-    return map[name] || (map[name] = new Subscription<T, P, D>(this, options));
+    const { _subscriptions } = this;
+
+    if (IN_BROWSER) {
+      return (
+        _subscriptions[name] ||
+        (_subscriptions[name] = new Subscription<T, P, D>(this, options))
+      );
+    }
+
+    return SSRSubscription;
   }
 }
